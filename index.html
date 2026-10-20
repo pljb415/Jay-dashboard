@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 통합 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Pretendard', sans-serif; } </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col items-center py-10 px-4">
+
+    <header class="w-full max-w-4xl mb-8 text-center">
+        <h1 class="text-3xl font-bold text-slate-900">✨ 스마트 통합 대시보드</h1>
+        <p class="text-slate-500 mt-2">생각나는 대로 적고, 정제하고, 한눈에 관리하세요.</p>
+        
+        <div class="flex justify-center items-center gap-4 mt-6">
+            <div id="step1-indicator" class="px-4 py-1.5 rounded-full text-sm font-semibold bg-blue-600 text-white transition-all">1단계: 무작위 입력</div>
+            <span class="text-slate-300">→</span>
+            <div id="step2-indicator" class="px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-200 text-slate-600 transition-all">2단계: 세부 분류 및 정제</div>
+            <span class="text-slate-300">→</span>
+            <div id="step3-indicator" class="px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-200 text-slate-600 transition-all">3단계: 최종 대시보드</div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-4xl bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+
+        <!-- ================= [STEP 1] 무작위 입력 ================= -->
+        <section id="view-step1" class="space-y-6">
+            <div class="border-b pb-4">
+                <h2 class="text-xl font-bold text-slate-800">1단계: 생각나는 대로 입력하기 (Brain Dump)</h2>
+                <p class="text-sm text-slate-500 mt-1">마감일은 자유롭게 적으시고 중요도를 선택하세요.</p>
+            </div>
+
+            <form id="task-form" class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                <div class="md:col-span-8">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">내용 / 할 일</label>
+                    <input type="text" id="input-content" required placeholder="예: 상임위 업무보고 자료 검토" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                </div>
+                <div class="md:col-span-4">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">중요도 (2단계)</label>
+                    <select id="input-importance" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white font-semibold">
+                        <option value="일반">🟢 일반</option>
+                        <option value="중요">⭐ 중요</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-4">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">대분류</label>
+                    <select id="input-cat1" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                        <option value="업무">🏢 업무</option>
+                        <option value="개인">👤 개인</option>
+                        <option value="기타">📌 기타</option>
+                    </select>
+                </div>
+                <div class="md:col-span-4">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">소분류</label>
+                    <input type="text" id="input-cat2" required placeholder="예: 교통전문위원실" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                </div>
+                <div class="md:col-span-4">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">마감일</label>
+                    <input type="text" id="input-date" required placeholder="예: 3일 이내, 내일 오전" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                </div>
+                
+                <div class="md:col-span-12 flex justify-end mt-2">
+                    <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors shadow-sm">
+                        + 항목 추가하기
+                    </button>
+                </div>
+            </form>
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-700 mb-3">등록된 항목 (<span id="task-count">0</span>개)</h3>
+                <div id="raw-task-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <p class="text-sm text-slate-400 text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">아직 입력된 항목이 없습니다.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-4 border-t">
+                <button onclick="goToStep(2)" id="to-step2-btn" disabled class="px-6 py-3 bg-slate-200 text-slate-400 font-semibold rounded-xl text-sm transition-colors cursor-not-allowed">
+                    다음: 세부 분류 및 정제하기 →
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= [STEP 2] 세부 분류 및 정제 ================= -->
+        <section id="view-step2" class="hidden space-y-6">
+            <div class="border-b pb-4">
+                <h2 class="text-xl font-bold text-slate-800">2단계: 세부 분류 및 정제 (대분류 정렬)</h2>
+                <p class="text-sm text-slate-500 mt-1">대분류별로 정렬된 항목을 검토·수정하고, 필요시 아래에서 항목을 추가하세요.</p>
+            </div>
+
+            <!-- 편집 테이블 -->
+            <div class="overflow-x-auto border rounded-xl">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead class="bg-slate-100 text-slate-700 font-semibold border-b">
+                        <tr>
+                            <th class="p-3">대분류</th>
+                            <th class="p-3">소분류</th>
+                            <th class="p-3">내용</th>
+                            <th class="p-3">마감일</th>
+                            <th class="p-3 text-center">중요도</th>
+                            <th class="p-3 text-center">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="refine-table-body" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+
+            <!-- 2단계 추가 입력 영역 -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                <h3 class="text-xs font-bold text-slate-700">➕ 누락된 항목 추가하기</h3>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                    <div class="md:col-span-2">
+                        <select id="refine-add-cat1" class="w-full px-2 py-2 border rounded bg-white text-xs font-semibold">
+                            <option value="업무">🏢 업무</option>
+                            <option value="개인">👤 개인</option>
+                            <option value="기타">📌 기타</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <input type="text" id="refine-add-cat2" placeholder="소분류" class="w-full px-2 py-2 border rounded text-xs bg-white">
+                    </div>
+                    <div class="md:col-span-3">
+                        <input type="text" id="refine-add-content" placeholder="할 일 내용" class="w-full px-2 py-2 border rounded text-xs bg-white">
+                    </div>
+                    <div class="md:col-span-2">
+                        <input type="text" id="refine-add-date" placeholder="마감일" class="w-full px-2 py-2 border rounded text-xs bg-white">
+                    </div>
+                    <div class="md:col-span-2">
+                        <select id="refine-add-importance" class="w-full px-2 py-2 border rounded bg-white text-xs font-semibold">
+                            <option value="일반">🟢 일반</option>
+                            <option value="중요">⭐ 중요</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1">
+                        <button onclick="addTaskInStep2()" class="w-full h-full bg-slate-800 hover:bg-slate-900 text-white rounded text-xs font-medium py-2">추가</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between pt-4 border-t">
+                <button onclick="goToStep(1)" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-xl text-sm">← 이전으로</button>
+                <button onclick="goToStep(3)" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-colors">
+                    최종 대시보드 보기 →
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= [STEP 3] 최종 대시보드 ================= -->
+        <section id="view-step3" class="hidden space-y-6">
+            <div class="border-b pb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">3단계: 최종 대시보드</h2>
+                    <p class="text-sm text-slate-500 mt-1">정제된 모든 업무와 일정이 카테고리별로 깔끔하게 요약되었습니다.</p>
+                </div>
+                <button onclick="resetAll()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-lg text-xs">🔄 새로 작성하기</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl">
+                    <p class="text-xs font-semibold text-blue-600">전체 항목</p>
+                    <p id="dash-total" class="text-2xl font-bold text-blue-900 mt-1">0개</p>
+                </div>
+                <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl">
+                    <p class="text-xs font-semibold text-amber-600">중요 항목 (⭐)</p>
+                    <p id="dash-important" class="text-2xl font-bold text-amber-900 mt-1">0개</p>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-xl">
+                    <p class="text-xs font-semibold text-emerald-600">업무 / 개인 비율</p>
+                    <p id="dash-ratio" class="text-lg font-bold text-emerald-900 mt-1">업무 0 / 개인 0</p>
+                </div>
+            </div>
+
+            <div id="dashboard-content" class="space-y-6 mt-6"></div>
+        </section>
+    </main>
+
+    <script>
+        let tasks = [];
+
+        // Step 1: 폼 제출 시 태스크 추가
+        document.getElementById('task-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = document.getElementById('input-content').value;
+            const cat1 = document.getElementById('input-cat1').value;
+            const cat2 = document.getElementById('input-cat2').value;
+            const date = document.getElementById('input-date').value;
+            const importance = document.getElementById('input-importance').value;
+
+            tasks.push({ id: Date.now(), content, cat1, cat2, date, importance });
+            
+            document.getElementById('input-content').value = '';
+            document.getElementById('input-content').focus();
+            renderStep1List();
+        });
+
+        function renderStep1List() {
+            const listEl = document.getElementById('raw-task-list');
+            const countEl = document.getElementById('task-count');
+            const btnEl = document.getElementById('to-step2-btn');
+            countEl.textContent = tasks.length;
+
+            if (tasks.length === 0) {
+                listEl.innerHTML = `<p class="text-sm text-slate-400 text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">아직 입력된 항목이 없습니다.</p>`;
+                btnEl.disabled = true;
+                btnEl.className = "px-6 py-3 bg-slate-200 text-slate-400 font-semibold rounded-xl text-sm transition-colors cursor-not-allowed";
+                return;
+            }
+
+            btnEl.disabled = false;
+            btnEl.className = "px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition-colors shadow-sm cursor-pointer";
+
+            listEl.innerHTML = tasks.map((t, idx) => `
+                <div class="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 text-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-slate-400 w-6">#${idx + 1}</span>
+                        <span class="px-2 py-0.5 ${t.importance === '중요' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-600'} rounded text-xs font-semibold">${t.importance}</span>
+                        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold">${t.cat1} > ${t.cat2}</span>
+                        <span class="font-medium text-slate-800">${t.content}</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-xs text-slate-500 bg-white px-2.5 py-1 rounded border border-slate-200">⏳ ${t.date}</span>
+                        <button onclick="deleteTask(${t.id})" class="text-red-400 hover:text-red-600 text-xs font-medium">삭제</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderStep1List();
+        }
+
+        function goToStep(step) {
+            document.getElementById('view-step1').classList.add('hidden');
+            document.getElementById('view-step2').classList.add('hidden');
+            document.getElementById('view-step3').classList.add('hidden');
+
+            document.getElementById('step1-indicator').className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-200 text-slate-600 transition-all";
+            document.getElementById('step2-indicator').className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-200 text-slate-600 transition-all";
+            document.getElementById('step3-indicator').className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-200 text-slate-600 transition-all";
+
+            if (step === 1) {
+                document.getElementById('view-step1').classList.remove('hidden');
+                document.getElementById('step1-indicator').className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-blue-600 text-white transition-all";
+            } else if (step === 2) {
+                document.getElementById('view-step2').classList.remove('hidden');
+                document.getElementById('step2-indicator').className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-blue-600 text-white transition-all";
+                renderStep2Table();
+            } else if (step === 3) {
+                document.getElementById('view-step3').classList.remove('hidden');
+                document.getElementById('step3-indicator').className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-blue-600 text-white transition-all";
+                renderDashboard();
+            }
+        }
+
+        // Step 2: 대분류 기준 정렬 렌더링
+        function renderStep2Table() {
+            const tbody = document.getElementById('refine-table-body');
+            
+            // 대분류 기준 정렬 (업무 -> 개인 -> 기타 순서)
+            const sortedTasks = [...tasks].sort((a, b) => a.cat1.localeCompare(b.cat1));
+
+            if (sortedTasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400 text-sm">등록된 항목이 없습니다.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sortedTasks.map((t) => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="p-3">
+                        <select onchange="updateTaskField(${t.id}, 'cat1', this.value)" class="px-2 py-1.5 border rounded bg-white text-xs font-semibold">
+                            <option value="업무" ${t.cat1 === '업무' ? 'selected' : ''}>🏢 업무</option>
+                            <option value="개인" ${t.cat1 === '개인' ? 'selected' : ''}>👤 개인</option>
+                            <option value="기타" ${t.cat1 === '기타' ? 'selected' : ''}>📌 기타</option>
+                        </select>
+                    </td>
+                    <td class="p-3">
+                        <input type="text" value="${t.cat2}" onchange="updateTaskField(${t.id}, 'cat2', this.value)" class="px-2 py-1.5 border rounded text-xs w-full">
+                    </td>
+                    <td class="p-3">
+                        <input type="text" value="${t.content}" onchange="updateTaskField(${t.id}, 'content', this.value)" class="px-2 py-1.5 border rounded text-xs w-full">
+                    </td>
+                    <td class="p-3">
+                        <input type="text" value="${t.date}" onchange="updateTaskField(${t.id}, 'date', this.value)" class="px-2 py-1.5 border rounded text-xs w-full">
+                    </td>
+                    <td class="p-3 text-center">
+                        <select onchange="updateTaskField(${t.id}, 'importance', this.value)" class="px-2 py-1.5 border rounded bg-white text-xs font-semibold">
+                            <option value="일반" ${t.importance === '일반' ? 'selected' : ''}>🟢 일반</option>
+                            <option value="중요" ${t.importance === '중요' ? 'selected' : ''}>⭐ 중요</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteTaskStep2(${t.id})" class="text-red-500 hover:text-red-700 text-xs font-medium px-2 py-1 bg-red-50 rounded">제외</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateTaskField(id, field, value) {
+            const task = tasks.find(t => t.id === id);
+            if (task) task[field] = value;
+        }
+
+        function deleteTaskStep2(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderStep2Table();
+        }
+
+        // 2단계에서 항목 직접 추가 기능
+        function addTaskInStep2() {
+            const cat1 = document.getElementById('refine-add-cat1').value;
+            const cat2 = document.getElementById('refine-add-cat2').value;
+            const content = document.getElementById('refine-add-content').value;
+            const date = document.getElementById('refine-add-date').value;
+            const importance = document.getElementById('refine-add-importance').value;
+
+            if (!content || !cat2 || !date) {
+                alert("소분류, 내용, 마감일을 모두 입력해 주세요.");
+                return;
+            }
+
+            tasks.push({ id: Date.now(), content, cat1, cat2, date, importance });
+
+            // 입력폼 초기화
+            document.getElementById('refine-add-cat2').value = '';
+            document.getElementById('refine-add-content').value = '';
+            document.getElementById('refine-add-date').value = '';
+            
+            renderStep2Table();
+        }
+
+        // Step 3 대시보드 렌더링
+        function renderDashboard() {
+            document.getElementById('dash-total').textContent = `${tasks.length}개`;
+            document.getElementById('dash-important').textContent = `${tasks.filter(t => t.importance === '중요').length}개`;
+            
+            const workCount = tasks.filter(t => t.cat1 === '업무').length;
+            const personalCount = tasks.filter(t => t.cat1 === '개인').length;
+            document.getElementById('dash-ratio').textContent = `업무 ${workCount} / 개인 ${personalCount}`;
+
+            const container = document.getElementById('dashboard-content');
+            if (tasks.length === 0) {
+                container.innerHTML = `<p class="text-sm text-slate-400 text-center py-10 bg-slate-50 rounded-xl border border-dashed">데이터가 없습니다.</p>`;
+                return;
+            }
+
+            const grouped = {};
+            tasks.forEach(t => {
+                const key = `${t.cat1} > ${t.cat2}`;
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(t);
+            });
+
+            container.innerHTML = Object.entries(grouped).map(([category, items]) => `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                    <h3 class="font-bold text-slate-800 text-base mb-3 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                        ${category} <span class="text-xs font-normal text-slate-500">(${items.length}건)</span>
+                    </h3>
+                    <div class="space-y-2">
+                        ${items.map(item => `
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 flex justify-between items-center text-sm shadow-xs">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-0.5 ${item.importance === '중요' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'} rounded text-xs font-semibold">${item.importance}</span>
+                                    <span class="font-medium text-slate-800">${item.content}</span>
+                                </div>
+                                <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full border border-slate-200">⏳ ${item.date}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resetAll() {
+            tasks = [];
+            goToStep(1);
+            renderStep1List();
+        }
+    </script>
+</body>
+</html>
